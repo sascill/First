@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="p.s.c.Member.MemberDao.MemberDao">
+	<select id="loginUser" resultType="int">
+	select status from (
+   		 select 1 status FROM member WHERE ID = #{id} AND password = #{password}
+   		 union all
+   		 select 2 status from member where id = #{id}
+   		 union all
+  		 select 3 status from dual
+	)<![CDATA[WHERE ROWNUM <= 1]]>
+	</select>
+	
+	<select id="findUser" resultType="p.s.c.Member.MemberDto.MemberDto">
+		select id, password,email,nickname from member where email = #{email}
+	</select>
+	
+	<select id="loginInfo" resultType="p.s.c.Member.MemberDto.MemberDto">
+	 	select id, nickname,email from member where id = #{id}
+	</select>
+	 
+	<select id="checkDuplicate" resultType="int">
+		select status from (
+   		 select 1 status from member where email = #{email}
+   		 union all
+   		 select 2 status from member where nickname = #{nickName}
+   		 union all
+   		 select 3 status from member where  id = #{id}
+   		 union all
+   		 select 4 status from member 
+	)<![CDATA[WHERE ROWNUM <= 1]]>
+	</select>
+	
+	<select id="checkPassword" resultType="int">
+		select status from (
+   		 select 1 status from member where id = #{id} and password = #{password}
+   		 union all
+   		 select 2 status from member where id = #{id}
+   		 )
+   		 <![CDATA[WHERE ROWNUM <= 1]]>
+	</select>
+	
+	<select id="checkUser" resultType="int">
+		select status from (
+   		 select 1 status from member where email = #{email}
+   		 union all
+   		 select 2 status from member
+   		 )
+   		 <![CDATA[WHERE ROWNUM <= 1]]>
+	</select>
+
+	<insert id="addUser">
+		insert into member(mnum, id, password, nickname, email, mailing)
+		 values (mnum_seq.nextval, #{id}, #{password}, #{nickName}, #{email}, #{checkMailing})
+	</insert>
+	
+	<update id="modifyPassword" parameterType="java.util.HashMap">
+		update member set password = #{newPassword} where id = #{id} and password = #{password}
+	</update>
+	
+	<update id="modifyInfo">
+		update member set nickName = #{nickName}, email = #{email} where id = #{id}
+	</update>
+	
+	<delete id="deleteUser">
+		delete from member where id = #{id}
+	</delete>
+</mapper>

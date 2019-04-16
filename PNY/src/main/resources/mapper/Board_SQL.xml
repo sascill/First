@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="p.s.c.BoardDao.BoardDao">
+	<select id="listDao" resultType="p.s.c.Board.BoardDto.BoardDto">
+		select * from(
+			select A.*, rownum as rnum from
+				(select board.* from board order by bnum desc)A
+				<if test="searchType != null">
+					where ${searchType} like '%' || #{searchKeyword} || '%'
+				</if>)
+				<if test="checkMain != true">
+					where rnum between #{pageStart} and #{pageEnd}
+				</if> 
+	</select>
+	
+	<select id="countDao" resultType="int">
+		select count(*) from board
+		<if test="searchType != null">
+			where ${searchType} like '%' || #{searchKeyword} || '%'
+		</if>
+	</select>
+	
+	<insert id="writeDao" parameterType="java.util.HashMap">
+		insert into board(bnum, subject, writer, content, datetime, bcode, mcode) values(num_seq.nextval, #{subject}, #{writer}, #{content}, sysdate, #{bcode}, (select mnum from member where nickname = #{writer}) )
+	</insert>
+	
+	<select id="contentDao" resultType="p.s.c.Board.BoardDto.BoardDto">
+		select * from board where bnum = #{pram1}
+	</select>
+	
+	<select id="replyDao" resultType="p.s.c.Board.BoardReplyDto.BoardReplyDto">
+		select * from board_reply where bnum = #{param1}
+	</select>
+	
+	<insert id="addReply">
+		insert into board_reply(br_num, br_writer, br_content, bnum) values(br_seq.nextval,#{writer},#{content},#{bnum})
+	</insert>
+	
+	<delete id="deleteDao" >
+		delete from board where bnum = #{pram1}
+	</delete>
+	
+	<update id="updateDao" parameterType="java.util.HashMap">
+		update board set subject = #{subject}, writer = #{writer}, content = #{content} where bnum = #{bnum}
+	</update>
+</mapper>
